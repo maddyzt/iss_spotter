@@ -68,8 +68,29 @@ const fetchISSFlyOverTimes = (coords, callback) => {
 
 };
 
+// define a function to chain all 3 functions together
+const nextISSTimesForMyLocation = (callback) => {
+  fetchMyIP((error, ip) => {
+    if (error) {
+      return callback(error, null);
+    }
+
+    fetchCoordsByIP(ip, (error, coords) => {
+      if (error) {
+        return callback(error, null);
+      }
+
+      fetchISSFlyOverTimes(coords, (error, flyOverTimes) => {
+        if (error) {
+          return callback(error, null);
+        }
+        callback(null, flyOverTimes);
+      });
+    });
+  });
+};
+
 // export all functions for use in index file
-module.exports = { fetchMyIP, fetchCoordsByIP, fetchISSFlyOverTimes };
+// module.exports = { fetchMyIP, fetchCoordsByIP, fetchISSFlyOverTimes };
+module.exports = { nextISSTimesForMyLocation };
 
-
-// https://iss-pass.herokuapp.com/json/?lat=43.70317077636719&lon=-79.51219177246094
