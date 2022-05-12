@@ -38,10 +38,11 @@ const printPassTimes = (passTimes) => {
   }
 };
 
-nextISSTimesForMyLocation((error, passTimes) => {
-  if (error) {
-    return console.log("It didn't work!", error);
-  }
+// nextISSTimesForMyLocation((error, passTimes) => {
+//   if (error) {
+//     return console.log("It didn't work!", error);
+//   }
+//   console.log(passTimes);
+// });
 
-  console.log(passTimes);
-});
+module.exports = printPassTimes;
