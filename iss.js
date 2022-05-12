@@ -1,14 +1,7 @@
-/**
- * Makes a single API request to retrieve the user's IP address.
- * Input:
- *   - A callback (to pass back an error or the IP string)
- * Returns (via Callback):
- *   - An error, if any (nullable)
- *   - The IP address as a string (null if error). Example: "162.245.144.188"
- */
-
+// require request to fetch data through APIs
 const request = require("request");
 
+// define a function to fetch the public IP address
 const fetchMyIP = (callback) => {
   request('https://api.ipify.org?format=json', (error, response, body) => {
     if (error) {
@@ -28,4 +21,55 @@ const fetchMyIP = (callback) => {
   });
 };
 
-module.exports = { fetchMyIP };
+// define a function to fetch geo coordinates and return in an object
+const fetchCoordsByIP = (ip, callback) => {
+  request(`https://api.ipbase.com/v2/info?ip=${ip}&apikey=xrzGMFV38CUyjHNqTt5kfWwQ1EaN0uUtIw8ONhTU`, (error, response, body) => {
+    if (error) {
+      callback(error, null);
+      return;
+    }
+
+    if (response.statusCode !== 200) {
+      const msg = `Status Code ${response.statusCode} when fetching coordinates. Response: ${body}`;
+      callback(Error(msg), null);
+      return;
+    }
+    
+    let latitude = JSON.parse(body).data.location.latitude;
+    let longitude = JSON.parse(body).data.location.longitude;
+
+    let geoObject = {
+      "latitude": latitude,
+      "longitude": longitude
+    };
+
+    callback(null, geoObject);
+  });
+};
+
+// define a function to return the next 5 flyover times from the ISS API
+const fetchISSFlyOverTimes = (coords, callback) => {
+  let latitude = coords.latitude;
+  let longitude = coords.longitude;
+
+  request(`https://iss-pass.herokuapp.com/json/?lat=${latitude}&lon=${longitude}`, (error, response, body) => {
+    if (error) {
+      callback(error, null);
+      return;
+    }
+
+    if (response.statusCode !== 200) {
+      const msg = `Status code ${response.status} when fetching flyover times. Response: ${body}`;
+      return;
+    }
+
+    callback(null, JSON.parse(body).response);
+  });
+
+};
+
+// export all functions for use in index file
+module.exports = { fetchMyIP, fetchCoordsByIP, fetchISSFlyOverTimes };
+
+
+// https://iss-pass.herokuapp.com/json/?lat=43.70317077636719&lon=-79.51219177246094
